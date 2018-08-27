@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ztcf.dao.ZjcfDeptnumberDao">
+
+    <!--查询部门人数-->
+    <!--因为ifnull使用有问题，用sum(num)函数有效替代num-->
+    <select id="findDeptNum" resultType="java.lang.Long">
+         select IFNULL(SUM(Num),0) from zjcf_deptnumber
+            where Dept=#{Dept,jdbcType=VARCHAR} and SysDate=#{SysDate,jdbcType=DATE}
+    </select>
+   
+</mapper>

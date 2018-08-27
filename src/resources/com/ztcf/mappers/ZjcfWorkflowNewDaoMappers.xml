@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ztcf.dao.ZjcfWorkflowNewDao">
+
+    <resultMap type="com.ztcf.entity.Model" id="map">
+        <id column="xs_dept" property="xsDept" />
+        <result column="count" property="counts"/>
+    </resultMap>
+    <resultMap type="com.ztcf.entity.Model2" id="map2">
+        <id column="xsdept" property="xsDept" />
+        <result column="upamount" property="upamount" />
+        <result column="count" property="counts"/>
+    </resultMap>
+    <!--查询时间周期内完成订单数-->
+
+    <!--当天-->
+    <select id="findtime11"  resultType="java.lang.Integer">
+           select count(id) as count,xs_dept  from zjcf_workflow_new
+        where TO_DAYS(#{date,jdbcType=DATE}) - TO_DAYS(operdate)=0 and xs_dept=#{xs_dept}
+    </select>
+
+
+
+    <!--当周-->
+    <!--dayofweek 周日为第一天，weekday 周一为第一天但是从0开始需要加1-->
+    <select id="findtime22"  resultType="java.lang.Integer">
+           select count(id) as count,xs_dept  from zjcf_workflow_new
+        where datediff(#{date,jdbcType=DATE},operdate)&lt;=(WEEKDAY(#{date,jdbcType=DATE})+1) and operdate&lt;=#{date,jdbcType=DATE}
+   and xs_dept=#{xs_dept}
+    </select>
+    <!--当月-->
+
+    <select id="findtime33"  resultType="java.lang.Integer">
+           select count(id) as count,xs_dept  from zjcf_workflow_new
+        where datediff(#{date,jdbcType=DATE},operdate)&lt;=DAYOFMONTH(#{date,jdbcType=DATE}) and operdate&lt;=#{date,jdbcType=DATE}
+       and xs_dept=#{xs_dept}
+    </select>
+
+    <!--查询时间周期内完成订金额-->
+    <!--当天-->
+
+    <select id="findTodayAmout"  resultType="java.lang.Double">
+        select IFNULL(sum(amount) ,0),xs_dept  from zjcf_workflow_new
+        where TO_DAYS(#{date,jdbcType=DATE}) - TO_DAYS(operdate)=0
+        and xs_dept=#{xs_dept}
+    </select>
+
+    <!--当周-->
+    <!--dayofweek 周日为第一天，weekday 周一为第一天但是从0开始需要加1-->
+    <select id="findWeekAmout"   resultType="java.lang.Double">
+         select  IFNULL(sum(amount) ,0),xs_dept  from zjcf_workflow_new
+        where  datediff(#{date,jdbcType=DATE},operdate)&lt;=(WEEKDAY(#{date,jdbcType=DATE})+1) and operdate&lt;=#{date,jdbcType=DATE}
+         and xs_dept=#{xs_dept}
+
+    </select>
+    <!--当月-->
+    <select id="findMonthAmout"   resultType="java.lang.Double">
+         select IFNULL(sum(amount),0),xs_dept  from zjcf_workflow_new
+        where datediff(#{date,jdbcType=DATE},operdate)&lt;=(DAYOFMONTH(#{date,jdbcType=DATE}))and operdate&lt;=#{date,jdbcType=DATE}
+       and xs_dept=#{xs_dept}
+    </select>
+
+   <!--升级单统计-->
+    <resultMap id="sjmap" type="com.ztcf.entity.ZjcfWorkflowNew">
+        <id  property="id" column="id"/>
+        <result property="orderId" column="orderId"/>
+        <result property="xsDept" column="xs_dept"/>
+      <!--  <association property="tongjiChangsha" javaType="com.ztcf.entity.TongjiChangsha">-->
+            <result property="tongjiChangsha.uporderid" column="uporderid"/>
+            <result property="tongjiChangsha.uptradedate" column="uptradedate"/>
+            <result property="tongjiChangsha.neworderid" column="neworderid"/>
+            <result property="tongjiChangsha.upamount" column="upamount"/>
+       <!-- </association>-->
+    </resultMap>
+    <!--查询当天升级订单数-->
+    <select id="findTodaySj" resultType="java.lang.Integer">
+     select count(A.orderId) as count, B.uptradedate,A.xs_dept AS xsdept,B.upamount as upamount from zjcf_workflow_new A,
+     tongji_changsha B
+    where A.orderId=B.neworderid and uptradedate=#{date,jdbcType=DATE} and
+     A.xs_dept =#{xs_dept,jdbcType=VARCHAR}
+   </select>
+    <!--查询当天升级单金额-->
+    <select id="findTodaySjAmount" resultType="java.lang.Double">
+     select IFNULL(sum(B.upamount), 0)  from zjcf_workflow_new A,
+     tongji_changsha B
+    where A.orderId=B.neworderid and uptradedate=#{date,jdbcType=DATE} and
+     A.xs_dept =#{xs_dept,jdbcType=VARCHAR}
+   </select>
+
+    <!--查询当月升级订单数-->
+    <select id="findMonthSj"  resultType="java.lang.Integer">
+     select count(A.orderId) as count, B.uptradedate,A.xs_dept AS xsdept,B.upamount as upamount from zjcf_workflow_new A,
+     tongji_changsha B
+    where A.orderId=B.neworderid and datediff(#{date,jdbcType=DATE},uptradedate)&lt;=(DAYOFMONTH(#{date,jdbcType=DATE}))
+    and uptradedate&lt;=#{date,jdbcType=DATE} and
+     A.xs_dept =#{xs_dept,jdbcType=VARCHAR}
+   </select>
+
+    <!--查询当月升级订单金额-->
+    <select id="findMonthSjAmount"  resultType="java.lang.Double">
+     select  IFNULL(sum(B.upamount), 0)   from zjcf_workflow_new A,
+     tongji_changsha B
+    where A.orderId=B.neworderid and datediff(#{date,jdbcType=DATE},uptradedate)&lt;=(DAYOFMONTH(#{date,jdbcType=DATE}))
+    and uptradedate&lt;=#{date,jdbcType=DATE} and
+     A.xs_dept =#{xs_dept,jdbcType=VARCHAR}
+   </select>
+
+
+</mapper>

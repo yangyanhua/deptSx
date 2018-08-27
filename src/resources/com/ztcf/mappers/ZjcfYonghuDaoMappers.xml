@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ztcf.dao.ZjcfYonghuDao">
+
+    <!--查询yonghu表信息-->
+    <select id="findZjcfYonghu"  resultType="com.ztcf.entity.ZjcfYonghu">
+    select dept,name from zjcf_yonghu where is_lz=0 and Usertype="部门经理" and
+    dept in ("市场七部一处","市场七部二处","市场七部三处","市场六部一处","市场六部二处","市场六部三处",
+    "市场六部四处","市场六部五处") order by dept
+    </select>
+
+    <resultMap id="yhnum" type="com.ztcf.entity.ZjcfYonghu">
+        <id property="uid" column="uid"/>
+        <result property="dept" column="dept"/>
+        <result property="name" column="name"/>
+        <!--<association property="zjcfDeptnumber" javaType="com.ztcf.entity.ZjcfDeptnumber">-->
+            <result  property="zjcfDeptnumber.dept" column="dept"/>
+            <result property="zjcfDeptnumber.sysdate" column="sysdate"/>
+            <result property="zjcfDeptnumber.num" column="num"/>
+
+    </resultMap>
+
+    <!--关联表查询部门、负责人、人数-->
+    <select id="selectYHandNumm" resultMap="yhnum">
+        select ifnull(yh.dept,0)as dept ,ifnull(yh.name,0) AS name,ifnull(dn.num,0) as num
+        from zjcf_yonghu yh left join zjcf_deptnumber dn on yh.dept=dn.dept
+        where yh.userType='部门经理' and yh.is_lz=0 and yh.dept in
+        ("市场七部一处","市场七部二处","市场七部三处","市场六部一处","市场六部二处","市场六部三处",
+        "市场六部四处","市场六部五处")  and dn.sysdate =#{date,jdbcType=DATE}
+          ORDER BY yh.Dept
+    </select>
+
+
+    <!--分开单表查询-->
+    <select id="selectYh" resultType="com.ztcf.entity.ZjcfYonghu">
+        select dept,name from zjcf_yonghu
+         where userType='部门经理' and is_lz=0 and dept in
+        ("市场七部一处","市场七部二处","市场七部三处","市场六部一处","市场六部二处","市场六部三处",
+        "市场六部四处","市场六部五处")   ORDER BY Dept
+    </select>
+
+</mapper>
